@@ -13,6 +13,7 @@ type Block struct {
 	Data          []byte
 	PrevBlockHash []byte
 	Hash          []byte
+	Nonce         int
 }
 
 // SetHash create Hash for Block
@@ -26,7 +27,18 @@ func (b *Block) SetHash() {
 
 // NewBlock create the new Block
 func NewBlock(data string, prevBlockHash []byte) *Block {
-	block := &Block{time.Now().Unix(), []byte(data), prevBlockHash, []byte{}}
-	block.SetHash()
+	block := &Block{time.Now().Unix(), []byte(data), prevBlockHash, []byte{}, 0}
+	pow := NewProofOfWork(block)
+	nonce, hash := pow.Run()
+
+	block.Hash = hash[:]
+	block.Nonce = nonce
+
 	return block
+}
+
+// IsValide return status of block
+func (b *Block) IsValide() bool {
+	pow := NewProofOfWork(b)
+	return pow.Validate()
 }
